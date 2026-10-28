@@ -138,16 +138,7 @@ end
 ---@deprecated use https://coxdocs.dev/ox_inventory/Functions/Server#search
 functions.HasItem = function(source, items, amount) -- luacheck: ignore
     amount = amount or 1
-    local count = exports.ox_inventory:Search(source, 'count', items)
-    if type(items) == 'table' and type(count) == 'table' then
-        for _, v in pairs(count) do
-            if v < amount then
-                return false
-            end
-        end
-        return true
-    end
-    return count >= amount
+    return exports['qs-inventory']:HasItem(source, items, amount)
 end
 
 ---@deprecated use qbx.getVehiclePlate from modules/lib.lua

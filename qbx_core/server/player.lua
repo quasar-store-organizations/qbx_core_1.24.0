@@ -895,7 +895,7 @@ function CreatePlayer(playerData, Offline)
     ---@return boolean success
     function self.Functions.AddItem(item, amount, slot, metadata)
         assert(not self.Offline, 'unsupported for offline players')
-        return exports.ox_inventory:AddItem(self.PlayerData.source, oxItemCompat(item), amount, metadata, slot)
+        return exports['qs-inventory']:AddItem(self.PlayerData.source, oxItemCompat(item), amount, slot, metadata)
     end
 
     ---@deprecated use ox_inventory exports directly
@@ -905,7 +905,7 @@ function CreatePlayer(playerData, Offline)
     ---@return boolean success
     function self.Functions.RemoveItem(item, amount, slot)
         assert(not self.Offline, 'unsupported for offline players')
-        return exports.ox_inventory:RemoveItem(self.PlayerData.source, oxItemCompat(item), amount, nil, slot)
+        return exports['qs-inventory']:RemoveItem(self.PlayerData.source, oxItemCompat(item), amount, slot)
     end
 
     ---@deprecated use ox_inventory exports directly
@@ -913,7 +913,7 @@ function CreatePlayer(playerData, Offline)
     ---@return any table
     function self.Functions.GetItemBySlot(slot)
         assert(not self.Offline, 'unsupported for offline players')
-        return qbItemCompat(exports.ox_inventory:GetSlot(self.PlayerData.source, slot))
+        return qbItemCompat(exports['qs-inventory']:GetItemBySlot(self.PlayerData.source, slot))
     end
 
     ---@deprecated use ox_inventory exports directly
@@ -921,7 +921,7 @@ function CreatePlayer(playerData, Offline)
     ---@return any table
     function self.Functions.GetItemByName(itemName)
         assert(not self.Offline, 'unsupported for offline players')
-        return qbItemCompat(exports.ox_inventory:GetSlotWithItem(self.PlayerData.source, oxItemCompat(itemName)))
+        return qbItemCompat(exports['qs-inventory']:GetItemByName(self.PlayerData.source, oxItemCompat(itemName)))
     end
 
     ---@deprecated use ox_inventory exports directly
@@ -929,13 +929,13 @@ function CreatePlayer(playerData, Offline)
     ---@return any table
     function self.Functions.GetItemsByName(itemName)
         assert(not self.Offline, 'unsupported for offline players')
-        return qbItemCompat(exports.ox_inventory:GetSlotsWithItem(self.PlayerData.source, oxItemCompat(itemName)))
+        return qbItemCompat(exports['qs-inventory']:GetItemsByName(self.PlayerData.source, oxItemCompat(itemName)))
     end
 
     ---@deprecated use ox_inventory exports directly
     function self.Functions.ClearInventory()
         assert(not self.Offline, 'unsupported for offline players')
-        return exports.ox_inventory:ClearInventory(self.PlayerData.source)
+        return exports['qs-inventory']:ClearInventory(self.PlayerData.source)
     end
 
     ---@deprecated use ox_inventory exports directly
@@ -1104,6 +1104,7 @@ function Save(source)
     end)
     assert(GetResourceState('qb-inventory') ~= 'started', 'qb-inventory is not compatible with qbx_core. use ox_inventory instead')
     lib.print.verbose(('%s PLAYER SAVED!'):format(playerData.name))
+    exports['qs-inventory']:SaveInventory(source)
 end
 
 exports('Save', Save)
@@ -1297,7 +1298,7 @@ local function emitMoneyEvents(source, playerMoney, moneyType, amount, actionTyp
     local oxMoneyType = toOxAccountName(moneyType)
 
     if accountsAsItems[oxMoneyType] then
-        exports.ox_inventory:SetItem(source, oxMoneyType, playerMoney[moneyType])
+        exports['qs-inventory']:SetInventoryItems(source, oxMoneyType, playerMoney[moneyType])
     end
 end
 

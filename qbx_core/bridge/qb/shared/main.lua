@@ -1,68 +1,38 @@
 local qbShared = require 'shared.main'
+-- qs-inventory registers the items made in its in-game creator a moment after
+-- it starts, and can add or change them at any time. The lists are read once
+-- those are in, and again whenever qs-inventory reports a change.
+local isServer = IsDuplicityVersion()
 
-qbShared.Items = {}
-local oxItems = require '@ox_inventory.data.items'
-for item, data in pairs(oxItems) do
-    qbShared.Items[item] = {
-        name = item,
-        label = data.label,
-        weight = data.weight or 0,
-        type = 'item',
-        image = data.client?.image or string.strjoin(item,'.png'),
-        unique = false,
-        useable = true,
-        shouldClose = data.close or true,
-        combinable = nil,
-        description = data.description or nil
-    }
+local function syncItems()
+    local ok, items = pcall(function() return exports['qs-inventory']:GetItemList() end)
+    if ok and type(items) == 'table' then qbShared.Items = items end
+    local okWeapons, weapons = pcall(function() return exports['qs-inventory']:GetWeaponList() end)
+    if okWeapons and type(weapons) == 'table' then qbShared.Weapons = weapons end
 end
-local oxWeapons = require '@ox_inventory.data.weapons'
-for weapon, data in pairs(oxWeapons.Weapons) do
-    weapon = string.lower(weapon)
-    qbShared.Items[weapon] = {
-        name = weapon,
-        label = data.label,
-        weight = data.weight,
-        type = 'weapon',
-        ammotype = data.ammoname or nil,
-        image = data.client?.image or string.strjoin(weapon,'.png'),
-        unique = true,
-        useable = false,
-        shouldClose = true,
-        combinable = nil,
-        description = nil
-    }
+
+local function waitForItemList()
+    if not isServer then return end
+    local deadline = GetGameTimer() + 30000
+    while GetGameTimer() < deadline do
+        if GetResourceState('qs-inventory') == 'started' then
+            local ok, ready = pcall(function() return exports['qs-inventory']:ItemListReady() end)
+            -- An older qs-inventory has no such export: its list is complete as it is.
+            if not ok or ready then return end
+        end
+        Wait(250)
+    end
 end
-for component, data in pairs(oxWeapons.Components) do
-    component = string.lower(component)
-    qbShared.Items[component] = {
-        name = component,
-        label = data.label,
-        weight = data.weight,
-        type = 'component',
-        image = data.client?.image or string.strjoin(component,'.png'),
-        unique = true,
-        useable = false,
-        shouldClose = true,
-        combinable = nil,
-        description = data.description
-    }
-end
-for ammo, data in pairs(oxWeapons.Ammo) do
-    ammo = string.lower(ammo)
-    qbShared.Items[ammo] = {
-        name = ammo,
-        label = data.label,
-        weight = data.weight,
-        type = 'ammo',
-        image = data.client?.image or string.strjoin(ammo,'.png'),
-        unique = true,
-        useable = false,
-        shouldClose = true,
-        combinable = nil,
-        description = data.description
-    }
-end
+
+CreateThread(function()
+    syncItems()
+    waitForItemList()
+    syncItems()
+end)
+
+-- No QBCore:*:UpdateObject here: qs-inventory answers that event by applying its
+-- creator items again, which would fire this one again.
+AddEventHandler('qs-inventory:itemListUpdated', syncItems)
 
 local starterItems = require 'config.shared'.starterItems
 ---@deprecated use starterItems in config/shared.lua

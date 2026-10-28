@@ -11,16 +11,15 @@ end
 
 ---@param source Source
 local function giveStarterItems(source)
-    if GetResourceState('ox_inventory') == 'missing' then return end
-    while not exports.ox_inventory:GetInventory(source) do
+    while not exports['qs-inventory']:GetInventory(source) do
         Wait(100)
     end
     for i = 1, #starterItems do
         local item = starterItems[i]
         if item.metadata and type(item.metadata) == 'function' then
-            exports.ox_inventory:AddItem(source, item.name, item.amount, item.metadata(source))
+            exports['qs-inventory']:AddItem(source, item.name, item.amount, false, item.metadata(source))
         else
-            exports.ox_inventory:AddItem(source, item.name, item.amount, item.metadata)
+            exports['qs-inventory']:AddItem(source, item.name, item.amount, false, item.metadata)
         end
     end
 end

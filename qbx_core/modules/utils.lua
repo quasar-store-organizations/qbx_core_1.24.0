@@ -222,16 +222,7 @@ if isServer then
     ---@return boolean Returns true if the player has the specified items in the desired quantity, false otherwise
     function HasItem(source, items, amount) -- luacheck: ignore
         amount = amount or 1
-        local count = exports.ox_inventory:Search(source, 'count', items)
-        if type(items) == 'table' and type(count) == 'table' then
-            for _, v in pairs(count) do
-                if v < amount then
-                    return false
-                end
-            end
-            return true
-        end
-        return count >= amount
+        return exports['qs-inventory']:HasItem(source, items, amount)
     end
 else
     ---@deprecated use qbx.drawText2d from modules/lib.lua
@@ -302,16 +293,7 @@ else
     ---@return boolean Returns true if the player has the specified items in the desired quantity, false otherwise
     function HasItem(items, amount) -- luacheck: ignore
         amount = amount or 1
-        local count = exports.ox_inventory:Search('count', items)
-        if type(items) == 'table' and type(count) == 'table' then
-            for _, v in pairs(count) do
-                if v < amount then
-                    return false
-                end
-            end
-            return true
-        end
-        return count >= amount
+        return exports['qs-inventory']:HasItem(items, amount)
     end
 
     ---@deprecated use lib.requestAnimDict from ox_lib, and the TaskPlayAnim and RemoveAnimDict natives directly

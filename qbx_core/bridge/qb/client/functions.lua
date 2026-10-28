@@ -26,7 +26,7 @@ end
 ---@deprecated use https://coxdocs.dev/ox_inventory/Functions/Client#search
 functions.HasItem = function(items, amount)
     amount = amount or 1
-    local count = exports.ox_inventory:Search('count', items)
+    local count = exports['qs-inventory']:Search('count', items)
     if type(items) == 'table' and type(count) == 'table' then
         for _, v in pairs(count) do
             if v < amount then
